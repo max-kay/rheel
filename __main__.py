@@ -2,16 +2,23 @@ import mido
 from math import ceil
 from wheel import Wheel, GrooveForm
 from itertools import cycle, islice, compress
-from drum import drum_names
 import shutil
 import os
 
 SMALLEST_FRACTION = 1 / 16
-FORM = GrooveForm.LINEAR
+FORM = GrooveForm.ELLIPSE
 REST = 1 / 100
 RADIUS = 50
-AXIS_SIDE = 4
+AXIS_SIDE = 7.375
 FALL = 10
+
+my_mapping = {
+    36: "Kick",
+    38: "Snare",
+    42: "Hi Hat",
+    46: "Bell 1",
+    44: "Bell 2",
+}
 
 
 class Loop:
@@ -20,7 +27,7 @@ class Loop:
         self.time_signature = time_signature
         self.bpm = bpm
         self.num_bars = num_bars
-        # timing information e [0, 1)
+        # timing information in [0, 1)
         self.notes = {
             note: [x / (num_bars * time_signature[0]) for x in timings]
             for note, timings in notes.items()
@@ -46,7 +53,7 @@ Loop (
         wheels = []
         for key, timings in self.notes.items():
             title = f"{self.title}"
-            subtitle = f"{drum_names[key]}"
+            subtitle = f"{my_mapping[key]}"
             double_wheel = False
             for i in range(len(timings)):
                 if (timings[i] - timings[i - 1]) % 1 < SMALLEST_FRACTION:
@@ -82,7 +89,7 @@ def disentangle(timings: list[float]) -> tuple[float, float]:
         timings1 = list(compress(timings.copy(), to_list_1.copy()))
         to_list_2 = map(lambda x: not x, to_list_1)
         timings2 = list(compress(timings.copy(), to_list_2))
-        if is_ok(timings1) & is_ok(timings2):
+        if is_ok(timings1) and is_ok(timings2):
             assert len(timings1) + len(timings2) == len(timings)
             return (timings1, timings2)
     raise ValueError
@@ -99,13 +106,11 @@ def is_ok(timings):
     return True
 
 
-def make_wheel(timing, title, subtitle, info) -> Wheel:
-    wheel = Wheel(title, RADIUS, AXIS_SIDE, FALL, subtitle, info)
+def make_wheel(timing: list, title: str, subtitle: str, info: str) -> Wheel:
+    wheel = Wheel(title, RADIUS, AXIS_SIDE, subtitle, info)
     for i in range(len(timing)):
         wheel.add_trigger(
-            timing[i],
-            FORM,
-            min((timing[i] - timing[i - 1] - REST) % 1, 0.2),
+            timing[i], FORM, min((timing[i] - timing[i - 1] - REST) % 1, 0.2), FALL
         )
     return wheel
 
@@ -156,11 +161,9 @@ def make_out_folder(subfolder_name):
 
 
 if __name__ == "__main__":
-    name = "4*4_4"
+    name = "rheel"
     loop = load_midi(name)
     make_out_folder(name)
     for wheel in loop.as_wheels():
         subt = wheel.subtitle.replace("\n", " ")
-        wheel.get_svg(cut_color="#ff0000", draw_color="#0000000").saveSvg(
-            f"out/{name}/{subt}.svg"
-        )
+        wheel.get_svg().save_svg(f"out/{name}/{subt}.svg")

@@ -1,3 +1,4 @@
-sq axis side 4 mm
-wheel radius 50 mm
-10 mm 
+trägheitmoment schwungrad: 0.005 kg*m^2
+
+7.5 rpm = 1/8 Hz
+\omega = 1/8

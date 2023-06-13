@@ -1,5 +1,7 @@
-__pycache__/**
-*/.DS_Store
+__pycache__
 
-out/**
+*.DS_Store
+.vscode
+
+out
 drums.txt
