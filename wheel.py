@@ -1,4 +1,3 @@
-import pretty_errors
 import drawsvg as draw
 from math import sin, cos, tau
 

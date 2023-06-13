@@ -157,7 +157,7 @@ def make_out_folder(subfolder_name):
     path = f"./out/{subfolder_name}"
     if os.path.exists(path):
         shutil.rmtree(path)
-    os.mkdir(path)
+    os.makedirs(path)
 
 
 if __name__ == "__main__":
